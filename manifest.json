@@ -1,0 +1,9 @@
+{
+	"manifest_version": 3,
+	"name": "Bookmark Utility",
+	"version": "0.0.0",
+	"description": "An extension designed to ease the burden of a day to day management of bookmark backlogs",
+	"icons": {
+		"128": "media/icon128.png"
+	}
+}
