@@ -4,9 +4,21 @@
 	"developer": {
 		"name": "hanulon"
 	},
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "An extension designed to ease the burden of a day to day management of bookmark backlogs",
 	"icons": {
 		"128": "media/icon128.png"
-	}
+	},
+	"permissions": [
+		"contextMenus",
+        "bookmarks"
+	],
+	"background": {
+		"service_worker": "src/areas/background/app.js",
+		"type": "module"
+	},
+	"content_scripts": [{
+		"matches": ["<all_urls>"],
+		"js": ["src/areas/background/content.js"]
+	}]
 }
