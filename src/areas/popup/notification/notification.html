@@ -1,0 +1,24 @@
+<style>
+    .notification {
+        background-color: 219cf3;
+        position: absolute;
+        padding: 0.5em;
+        border-radius: 0.5em;
+        margin-top: 0.3em;
+        left: 50%;
+        transform: translate(-50%, 0);
+        text-align: center;
+        max-width: 90%;
+        width: max-content;
+        opacity: 0;
+        transition: all 100ms ease-out;
+    }
+    .notification.hidden{
+        display: none;
+    }
+    .notification.shown{
+        transition: all 100ms ease-in;
+        opacity: 1;
+    }
+</style>
+<div class="notification hidden"></div>

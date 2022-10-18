@@ -1,0 +1,103 @@
+<style>
+    .bookmark-feed-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .selector-container {
+        display: flex;
+        background-color: 666666;
+        color: white;
+    }
+    .selector-container select {
+        width: 60%;
+        background-color: 666666;
+        color: white;
+    }
+    .counter {
+        display: flex;
+        font-size: 1.4em;
+        width: 35%;
+    }
+    .counter input {
+        width: 80%;
+        background-color: 666666;
+        color: white;
+        border-width: 0;
+        text-align: right;
+    }
+    .counter span {
+        padding-right: 0.5em;
+    }
+    .reload-button {
+        padding: 0 0.2em;
+        background-color: 777777;
+    }
+    .reload-button:hover {
+        filter: brightness(70%);
+        cursor: pointer;
+    }
+    .list-of-links {
+        background-color: 222222;
+        color: white;
+        flex: 1;
+        overflow: auto;
+    }
+    .list-of-links ol {
+        padding-left: 2em;
+        padding-right: 1em;
+    }
+    .list-of-links ol a {
+        color: white;
+    }
+    .list-of-links ol a:visited {
+        color: 607d8b;
+    }
+    .list-of-links ol a:hover {
+        filter:brightness(70%);
+    }
+    .feed-actions {
+        display: flex;
+        background-color: 222222;
+        border-top-style: solid;
+        border-top-color: 333333;
+        border-top-width: thin;
+        margin-top: auto;
+    }
+    .feed-actions>div {
+        background-color: 444444;
+    }
+    .feed-actions>div:hover {
+        filter:brightness(70%);
+        cursor: pointer;
+    }
+    .feed-actions>div img {
+        width: 5em;
+    }
+    .feed-actions .delete-loaded {
+        background-color: red;
+        margin-left: auto;
+    }
+
+    .download-loaded-as-html a{
+        display: block;
+    }
+</style>
+<div class="bookmark-feed-container">
+    <notification-div></notification-div>
+    <div class="selector-container">
+        <select></select>
+        <div class="counter">
+            <input type="number" min="0" value="10"/>
+            /
+            <span>0</span>
+        </div>
+        <div class="reload-button"><img src="../../../../media/refresh-cw.svg" alt="Reload bookmarks in feed" /></div>
+    </div>
+    <div class="list-of-links"><ol></ol></div>
+    <div class="feed-actions">
+        <div class="copy-loaded-to-clipboard" title="Copy links to clipboard"><img src="./../../../../media/clipboard.svg"></div>
+        <div class="download-loaded-as-html" title="Download links as a document"><a download><img src="./../../../../media/download.svg"></a></div>
+        <div class="delete-loaded" title="Delete displayed links"><img src="./../../../../media/x-square.svg"></div>
+    </div>
+</div>

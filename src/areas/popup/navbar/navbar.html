@@ -1,0 +1,23 @@
+<style>
+    .navbar-container{
+        display: flex;
+        background-color: 222222;
+    }
+    .navbar-container>div {
+        padding: 1em;
+        background-color: 333333;
+        color: white;
+    }
+    .navbar-container>div.selected {
+        background-color: 555555;
+    }
+    .navbar-container>div:hover {
+        filter: brightness(70%);
+        cursor: pointer;
+    }
+</style>
+<div class="navbar-container">
+    <div id="feed">Feed</div>
+    <div id="update">Update</div>
+    <div id="settings">Settings</div>
+</div>

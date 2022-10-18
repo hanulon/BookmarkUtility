@@ -1,0 +1,23 @@
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, target-densityDpi=device-dpi">
+<style>
+    #open-all{
+        width: 100%;
+    }
+    h1{
+        text-align: center;
+    }
+</style>
+
+<h1>Links opener</h1>
+<div id="links-container">
+    <data-insert/>
+</div>
+<button id="open-all">Open all links at once</button>
+
+<script>
+    document.querySelector('#open-all').addEventListener('click', () => {
+        [...document.querySelectorAll('#links-container li a')].reverse().forEach(x => {
+            window.open(x.getAttribute('href'));
+        });
+    })
+</script>
