@@ -4,3 +4,6 @@ Bookmark Utility is an extension designed to ease the burden of a day to day man
 # Developer Tools
 - Visual Studio Code
     - web-extension from Marketplace for api autocompletion
+
+# Resources used
+- svg images from https://feathericons.com/
