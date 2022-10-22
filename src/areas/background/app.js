@@ -1,11 +1,12 @@
 const addToDefaultId = 'bookmark-utility-ad-link-to-default';
+const updaterIdTemplate = 'bookmark-utility-updater~';
 
-chrome.runtime.onInstalled.addListener(() => {
-    chrome.contextMenus.create({
-        title: 'Add link to default',
-        id: addToDefaultId,
-        contexts: ['link']
-    });
+setupUpdaterContextMenus('./updaterData.json');
+
+chrome.contextMenus.create({
+    title: 'Add link to default',
+    id: addToDefaultId,
+    contexts: ['link']
 });
 
 
@@ -18,5 +19,22 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
             url: info.linkUrl,
             parentId: '1' //adding to bookmarks bar
         });
+    } else if (info.menuItemId.startsWith(updaterIdTemplate)){
+        const bookmarkId = info.menuItemId.replace(updaterIdTemplate, '');
+        chrome.bookmarks.update(bookmarkId, {url: tab.url});
     }
 });
+
+async function setupUpdaterContextMenus(path){
+    const fetchedText = await fetch('./updaterData.json').then(resp => resp.text());
+    const bookmarkId = JSON.parse(fetchedText).id;
+    const bookmarks = await chrome.bookmarks.get(bookmarkId);
+    for(let bookmark of bookmarks){
+        const lastStashPosition = bookmark.url.lastIndexOf('/');
+        chrome.contextMenus.create({
+            title: `Update '${bookmark.title}' bookmark`,
+            id: updaterIdTemplate + bookmark.id,
+            documentUrlPatterns: [bookmark.url.substring(0, lastStashPosition + 1) + '*']
+        });
+    }
+}
