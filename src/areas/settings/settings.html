@@ -1,0 +1,91 @@
+<html>
+    <head>
+        <title>Settings - Bookmark Utility</title>
+        <style>
+            body{
+                margin: 0;
+                color: #fafafa;
+                background-color: #101214;
+            }
+            .header-bar{
+                border-bottom-color: #3d4852;
+                border-bottom-style: solid;
+                border-bottom-width: 1px;
+                background-color: #171b1f;
+                display: flex;
+                padding-left: 2em;
+                padding-top: 1em;
+                padding-bottom: 1em;
+            }
+            .header-bar img{
+                height: 3em;
+            }
+            .header-bar h1{
+                margin: 0;
+                align-self: center;
+                margin-left: 0.6em;
+            }
+            .main-container{
+                padding: 2em;
+                height: 80vh;
+                overflow: hidden;
+                display: flex;
+            }
+            bookmarks-selector{
+                height: 100%;
+                display: flex;
+                flex: 1;
+                flex-direction: column;
+                margin-right: 1em;
+            }
+            bookmarks-selector:last-child{
+                margin-right: 0;
+            }
+
+            
+            .styled-button{
+                background-color: #2a343f;
+                border-color: #3d4852;
+                border-style: solid;
+                border-width: 1px;
+                border-radius: 3px;
+                padding: 0.4em 0.8em;
+                color: unset;
+            }
+            .styled-button:hover{
+                filter:brightness(150%);
+                cursor: pointer;
+            }
+            .styled-button:active{
+                filter:brightness(120%);
+            }
+
+            .import-export-container{
+                padding: 1em 2em;
+                padding-bottom: 0;
+            }
+        </style>
+        <script type="module" src="/src/shared/components/notification/notification.js"></script>
+        <script type="module" src="/src/shared/components/checkbox/checkbox.js"></script>
+        <script type="module" src="/src/areas/settings/bookmarksSelector/bookmarksSelector.js"></script>
+        <script type="module" src="./settings.js"></script>
+    </head>
+    <body>
+        <notification-div></notification-div>
+        <div class="header-bar">
+            <img src="/media/icon128-w.png" />
+            <h1>Bookmark Utility - Settings</h1>
+        </div>
+        <div class="import-export-container">
+            <button class="styled-button export-btn">Export saved settings</button>
+            <button class="styled-button import-btn">Import settings</button>
+            <a id="export" download></a>
+            <input id="import" type="file" style="display:none">
+        </div>
+        <div class="main-container">
+            <bookmarks-selector for="feed" header="Feed folders" type="folder"></bookmarks-selector>
+            <bookmarks-selector for="context" header="Context menu folders" type="folder"></bookmarks-selector>
+            <bookmarks-selector for="updater" header="Updatable bookmarks" type="url"></bookmarks-selector>
+        </div>
+    </body>
+</html>

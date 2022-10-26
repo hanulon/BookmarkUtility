@@ -1,3 +1,5 @@
+import { Database, Stores } from "/src/shared/models/database.mjs";
+
 const template = await fetch('./bookmarkFeed/feedContainer.html').then(resp => resp.text());
 const openerDocumentTemplate = await fetch('./bookmarkFeed/linksOpenerDocument.html').then(resp => resp.text());
 
@@ -7,16 +9,20 @@ class FeedContainer extends HTMLElement {
         this._selectedFolderId = null;
         this._displayedLinksCount = 10;
         this._loadedLinkIds = [];
+        this._dao = new Database(Stores.feed);
     }
     connectedCallback() {
         this.attachShadow({mode: 'open'});
-        //for now getting folders from bookmarks bar
-        chrome.bookmarks.getChildren('1').then(nodes => {
-            this._folderOptions = nodes.filter(n => !n.url).map(n => ({value: n.id, label: n.title}));
-            this._selectedFolderId = this._folderOptions[0].value;
-        }).then(() => this.render());
+        this.loadOptions().then(() => this.render());
     }
 
+    async loadOptions(){
+        const ids = await this._dao.getBookmarkIds();
+        const results = await Promise.all(ids.map(id => chrome.bookmarks.get(id)));
+        const nodes = results.map(r => r[0]);
+        this._folderOptions = nodes.map(n => ({value: n.id, label: n.title}));
+        this._selectedFolderId = this._folderOptions[0]?.value;
+    }
     render(){
         this.shadowRoot.innerHTML = template;
         const container = this.shadowRoot.querySelector('.bookmark-feed-container');
@@ -38,8 +44,6 @@ class FeedContainer extends HTMLElement {
         counterInput.addEventListener('change', (evt) => {
             this._displayedLinksCount = evt.target.value;
         });
-
-        listOfLinks.addEventListener('click', (evt) => console.log(evt))
 
         if(this._selectedFolderId){
             chrome.bookmarks.getChildren(this._selectedFolderId).then(nodes => {

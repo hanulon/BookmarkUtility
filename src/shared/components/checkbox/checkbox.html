@@ -1,0 +1,36 @@
+<style>
+    .checkbox-container{
+        background: none;
+        border: 2px solid #3d4042;
+        border-radius: 2px;
+        box-sizing: border-box;
+        cursor: pointer;
+        flex-shrink: 0;
+        height: 16px;
+        width: 16px;
+        display: inline-block;
+        transform: translateY(15%);
+    }
+    .checkbox-container .checkmark {
+        border-color: white;
+        border-style: solid;
+        border-width: 0 2px 2px 0;
+        display: none;
+        height: 73%;
+        transform-origin: 100% 80%;
+        width: 36%;
+        transform: scale(1) rotate(45deg);
+        transition: transform 140ms ease-out;
+    }
+
+    .checkbox-container.checked{
+        background-color: #45b0e6;
+        border-color: #45b0e6;
+    }
+    .checkbox-container.checked .checkmark{
+        display: block;
+    }
+</style>
+<div class="checkbox-container">
+    <span class="checkmark"></span>
+</div>

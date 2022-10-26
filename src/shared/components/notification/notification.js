@@ -1,4 +1,4 @@
-const template = await fetch('./notification/notification.html').then(resp => resp.text());
+const template = await fetch('/src/shared/components/notification/notification.html').then(resp => resp.text());
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 class Notification extends HTMLElement {

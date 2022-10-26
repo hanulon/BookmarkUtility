@@ -1,0 +1,99 @@
+<style>
+    .item-container{
+        border-color: #3d4852;
+        border-style: solid;
+        border-width: 1px;
+        border-radius: 8px;
+        padding: 1em;
+        background-color: #171b1f;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        padding-right: 0;
+        height: 100%;
+    }
+    ::-webkit-scrollbar {
+        height: 12px;
+        width: 12px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background-clip: padding-box;
+        background-color: #6665;
+        border: 2px solid transparent;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: #9998;
+    }
+    .item-container h2{
+        margin-top: 0;
+    }
+    .bookmarks-list{
+        flex:1;
+        overflow: auto;
+    }
+    .action-bar{
+        padding-top: 1em;
+    }
+    .action-bar .selection-summary{
+        display: inline-block;
+        padding-left: 1em;
+    }
+    .bookmark-item{
+        border-style: solid;
+        border-width: 1px;
+        border-color: #3d4852;
+        border-top-width: 0;
+        padding: 0.2em 1em;
+        background-color: #171b1f;
+        padding-left: 0.6em;
+        min-height: 1.5em;
+    }
+    .bookmark-item:hover{
+        filter: brightness(150%);
+        cursor: pointer;
+    }
+    .bookmark-item:active{
+        filter: brightness(120%);
+    }
+    .bookmark-item:first-child{
+        border-top-width: 1px;
+        border-top-right-radius: 6px;
+        border-top-left-radius: 6px;
+    }
+    .bookmark-item:last-child{
+        border-bottom-right-radius: 6px;
+        border-bottom-left-radius: 6px;
+    }
+    .bookmark-item check-box{
+        margin-right: 0.6em;
+    }
+    .bookmark-item:hover check-box[checked="true"]{
+        filter: brightness(50%);
+    }
+    .bookmark-item.selected {
+        background-color: #007fff26;
+    }
+    .item-container select{
+        display: none;
+    }
+    [type="url"] .item-container select{
+        display: block;
+        background-color: #171b1f;;
+        margin-bottom: 1em;
+        margin-right: 1em;
+        color: white;
+    }
+</style>
+<div class="item-container">
+    <notification-div></notification-div>
+    <h2>Feed folders</h2>
+    <select></select>
+    <div class="bookmarks-list"></div>
+    <div class="action-bar">
+        <button class="styled-button save-btn">Save</button>
+        <div class="selection-summary">
+            Selected <span class="selected-count">0</span> of <span class="total-count"></span> items
+        </div>
+    </div>
+</div>

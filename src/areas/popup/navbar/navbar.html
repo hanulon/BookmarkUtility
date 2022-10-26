@@ -1,19 +1,22 @@
 <style>
     .navbar-container{
         display: flex;
-        background-color: 222222;
+        background-color: #222222;
     }
     .navbar-container>div {
         padding: 1em;
-        background-color: 333333;
+        background-color: #333333;
         color: white;
     }
     .navbar-container>div.selected {
-        background-color: 555555;
+        background-color: #555555;
     }
     .navbar-container>div:hover {
-        filter: brightness(70%);
+        filter: brightness(150%);
         cursor: pointer;
+    }
+    .navbar-container>div:active {
+        filter: brightness(120%);
     }
 </style>
 <div class="navbar-container">
