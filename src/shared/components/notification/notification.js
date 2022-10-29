@@ -10,8 +10,17 @@ class Notification extends HTMLElement {
         this.render();
     }
 
-    async show(message){
+    showError(message){
+        this.show(message, 'error');
+    }
+    showSuccess(message){
+        this.show(message, 'success');
+    }
+    async show(message, type){
         const notification = this.shadowRoot.querySelector('.notification');
+        notification.classList.remove('error');
+        notification.classList.remove('success');
+        notification.classList.add(type);
         notification.textContent = message;
         notification.classList.remove('hidden');
         await wait(1);

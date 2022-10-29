@@ -59,9 +59,9 @@ class MultiImporter extends HTMLElement {
                 await Promise.all(data.map(({url, title}) => chrome.bookmarks.create({
                     title, url, parentId: this._targetFolderId
                 })));
-                notification.show("Bookmarks saved successfully");
+                notification.showSuccess("Bookmarks saved successfully");
             } catch (error) {
-                notification.show(error);
+                notification.showError(error);
             }
         })
     }

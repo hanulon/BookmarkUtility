@@ -59,7 +59,7 @@ class BookmarksSelector extends HTMLElement {
 
         this.querySelector('.action-bar .save-btn').addEventListener('click', async () => {
             await this._dao.saveBookmarkIds([...this._selectedBookmarkIds]);
-            this.querySelector('notification-div').show('Feed bookmark folders saved');
+            this.querySelector('notification-div').showSuccess('Feed bookmark folders saved');
             const savedEvent = new CustomEvent('selectedBookmarksSaved');
             this.dispatchEvent(savedEvent);
         });

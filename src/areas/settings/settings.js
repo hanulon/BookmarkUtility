@@ -24,9 +24,9 @@ document.querySelector('#import').addEventListener('change', ({target: {files}})
         try{
             await new Database().saveAllSettings(JSON.parse(result));
             document.querySelectorAll('bookmarks-selector').forEach(bs => bs.render());
-            document.querySelector('notification-div').show("Settings imported successfully");
+            document.querySelector('notification-div').showSuccess("Settings imported successfully");
         }catch(e){
-            document.querySelector('notification-div').show("Failed to import settings");
+            document.querySelector('notification-div').showError("Failed to import settings");
         }
     };
     reader.readAsText(files[0]);
