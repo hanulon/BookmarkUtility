@@ -2,23 +2,48 @@
     <head>
         <style>
             body{
-                min-width: 300px;
+                width: 300px;
                 margin: 0;
                 display: flex;
                 flex-direction: column;
                 height: 100%;
+                background-color: #222222;
+                color: white;
             }
-            bookmark-feed{
+            .card{
+                display: none;
                 flex:1;
+            }
+            .card.selected{
+                display: block;
+            }
+            
+            .styled-button{
+                background-color: #2a343f;
+                border-color: #3d4852;
+                border-style: solid;
+                border-width: 1px;
+                border-radius: 3px;
+                padding: 0.4em 0.8em;
+                color: unset;
+            }
+            .styled-button:hover{
+                filter:brightness(150%);
+                cursor: pointer;
+            }
+            .styled-button:active{
+                filter:brightness(120%);
             }
         </style>
         <script type="module" src="./navbar/navbar.js"></script>
         <script type="module" src="/src/shared/components/notification/notification.js"></script>
         <script type="module" src="./bookmarkFeed/feedContainer.js"></script>
+        <script type="module" src="./multiImporter/multiImporter.js"></script>
         <script type="module" src="./popup.js"></script>
     </head>
     <body>
         <nav-bar></nav-bar>
-        <bookmark-feed></bookmark-feed>
+        <bookmark-feed type="feed" class="card"></bookmark-feed>
+        <multi-importer type="importer" class="card"></multi-importer>
     </body>
 </html>

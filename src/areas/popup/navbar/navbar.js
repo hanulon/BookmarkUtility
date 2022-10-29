@@ -10,6 +10,10 @@ class Navbar extends HTMLElement {
         this.render();
     }
 
+    setDefault(){
+        this.shadowRoot.querySelector('.navbar-container>div').click();
+    }
+
     handleChange(clickedTab){
         const event = new CustomEvent('change', {detail: {prevTabId: this._activeTabId, tabId: clickedTab.id}});
         
@@ -19,7 +23,6 @@ class Navbar extends HTMLElement {
         this._activeTabId = clickedTab.id;
         this.dispatchEvent(event);
     }
-
     render(){
         this.shadowRoot.innerHTML = template;
         this.shadowRoot.querySelectorAll('.navbar-container>div').forEach(el => {

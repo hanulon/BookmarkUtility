@@ -1,4 +1,5 @@
 import { Database, Stores } from "/src/shared/models/database.mjs";
+import { getFoldersFlatList } from "/src/shared/models/helpers.mjs";
 
 const template = await fetch('./bookmarksSelector/bookmarksSelector.html').then(resp => resp.text());
 
@@ -36,20 +37,21 @@ class BookmarksSelector extends HTMLElement {
         this.querySelector('.item-container>h2').textContent = this.getAttribute('header');
         
         const roots = await chrome.bookmarks.getTree();
-        const loadedBookmarks = this.getFoldersFlatList(roots[0].children, this.getAttribute('type'));
-        this._bookmarksCount = loadedBookmarks.length;
+        const {loadedFolders, bookmarksByFolderId} = getFoldersFlatList(roots[0].children, this.getAttribute('type'));
+        this._bookmarksByFolder = bookmarksByFolderId;
+        this._bookmarksCount = loadedFolders.length;
         if(this.getAttribute('type') === 'url'){
             const folderSelector = this.querySelector('select');
-            folderSelector.innerHTML = loadedBookmarks.map(({id, path}) => {
+            folderSelector.innerHTML = loadedFolders.map(({id, path}) => {
                 return `<option value="${id}">${path}</option>`;
             }).join('');
 
             folderSelector.addEventListener('change', ({target: {value}}) => {
                 this.renderBookmarksList(this._bookmarksByFolder.get(value));
             });
-            this.renderBookmarksList(this._bookmarksByFolder.get(loadedBookmarks[0].id));
+            this.renderBookmarksList(this._bookmarksByFolder.get(loadedFolders[0].id));
         } else {
-            this.renderBookmarksList(loadedBookmarks);
+            this.renderBookmarksList(loadedFolders);
         }
         
         this.querySelector('.action-bar .selection-summary .total-count').textContent = this._bookmarksCount;
@@ -81,34 +83,6 @@ class BookmarksSelector extends HTMLElement {
             }
             this.querySelector('.action-bar .selection-summary .selected-count').textContent = this._selectedBookmarkIds.size;
         }));
-    }
-
-    getFoldersFlatList(bookmarksArr, type){
-        const result = [];
-        for(let bookmark of bookmarksArr){
-            result.push(...this._getFlatTree(bookmark, '/', 0, type));
-        }
-
-        return result;
-    }
-    _getFlatTree(bookmark, parentPath, parentId, allowedType){
-        const currentPath = `${parentPath}/${bookmark.title}`;
-        const result = [];
-        if(!bookmark.url){
-            result.push({id: bookmark.id, title: bookmark.title, path: currentPath});
-        }
-        if(allowedType === 'url' && !!bookmark.url){
-            const siblingArray = this._bookmarksByFolder.get(parentId) ?? [];
-            if(!siblingArray.length){
-                this._bookmarksByFolder.set(parentId, siblingArray);
-            }
-            siblingArray.push({id: bookmark.id, title: bookmark.title, path: bookmark.title || bookmark.url});
-        }
-        for(let child of bookmark.children ?? []){
-            result.push(...this._getFlatTree(child, currentPath, bookmark.id, allowedType));
-        }
-
-        return result;
     }
 }
 
