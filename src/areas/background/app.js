@@ -1,6 +1,6 @@
 import {Database, Stores} from "/src/shared/models/database.mjs";
 
-const addToIdParent = 'bookmark-utility-ad-link-parent'
+const addToParentId = 'bookmark-utility-ad-link-parent'
 const addToIdTemplate = 'bookmark-utility-ad-link-to~';
 const updaterIdTemplate = 'bookmark-utility-updater~';
 const actionSettingsId = 'bookmark-utility-action-settings';
@@ -51,21 +51,21 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 });
 
 async function setup(){
-    setupUpdaterContextMenus('./updaterData.json');
+    setupUpdaterContextMenus();
 
     const dao = new Database(Stores.context);
-    const ids = await dao.getBookmarkIds();
-    const folders = (await Promise.all(ids.map(id => chrome.bookmarks.get(id)))).map(r => r[0]);
+    const savedBookmarks = await dao.getBookmarkInfos();
+    const folders = (await Promise.all(savedBookmarks.map(({id}) => chrome.bookmarks.get(id)))).map(r => r[0]);
     await chrome.contextMenus.create({
         title: `Add link to...`,
-        id: addToIdParent,
+        id: addToParentId,
         contexts: ['link']
     })
     folders.forEach(folder => chrome.contextMenus.create({
         title: `...${folder.title}`,
         id: addToIdTemplate + folder.id,
         contexts: ['link'],
-        parentId: addToIdParent
+        parentId: addToParentId
     }));
 
     chrome.contextMenus.create({
@@ -75,10 +75,10 @@ async function setup(){
     });
 }
 
-async function setupUpdaterContextMenus(path){
+async function setupUpdaterContextMenus(){
     const dao = new Database(Stores.updater);
-    const ids = await dao.getBookmarkIds();
-    const bookmarks = (await Promise.all(ids.map(id => chrome.bookmarks.get(id)))).map(r => r[0]);
+    const savedBookmarks = await dao.getBookmarkInfos();
+    const bookmarks = (await Promise.all(savedBookmarks.map(({id}) => chrome.bookmarks.get(id)))).map(r => r[0]);
     updaterUrls = new Set();
 
     for(let bookmark of bookmarks){

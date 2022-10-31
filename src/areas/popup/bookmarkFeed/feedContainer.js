@@ -17,8 +17,8 @@ class FeedContainer extends HTMLElement {
     }
 
     async loadOptions(){
-        const ids = await this._dao.getBookmarkIds();
-        const results = await Promise.all(ids.map(id => chrome.bookmarks.get(id)));
+        const savedBookmarks = await this._dao.getBookmarkInfos();
+        const results = await Promise.all(savedBookmarks.map(({id}) => chrome.bookmarks.get(id)));
         const nodes = results.map(r => r[0]);
         this._folderOptions = nodes.map(n => ({value: n.id, label: n.title}));
         this._selectedFolderId = this._folderOptions[0]?.value;

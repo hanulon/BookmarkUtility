@@ -6,7 +6,7 @@ const template = await fetch('./bookmarksSelector/bookmarksSelector.html').then(
 class BookmarksSelector extends HTMLElement {
     constructor(){
         super();
-        this._selectedBookmarkIds = new Set();
+        this._selectedBookmarks = [];
         this._bookmarksByFolder = new Map();
         this._bookmarksCount = 0;
         switch (this.getAttribute('for')) {
@@ -30,8 +30,8 @@ class BookmarksSelector extends HTMLElement {
     }
 
     async render(){
-        const ids = await this._dao.getBookmarkIds();
-        this._selectedBookmarkIds = new Set(ids);
+        const savedBookmarks = await this._dao.getBookmarkInfos();
+        this._selectedBookmarks = savedBookmarks;
 
         this.innerHTML = template;
         this.querySelector('.item-container>h2').textContent = this.getAttribute('header');
@@ -56,10 +56,10 @@ class BookmarksSelector extends HTMLElement {
         this.renderSelectedList();
         
         this.querySelector('.action-bar .selection-summary .total-count').textContent = this._bookmarksCount;
-        this.querySelector('.action-bar .selection-summary .selected-count').textContent = this._selectedBookmarkIds.size;
+        this.querySelector('.action-bar .selection-summary .selected-count').textContent = this._selectedBookmarks.length;
 
         this.querySelector('.action-bar .save-btn').addEventListener('click', async () => {
-            await this._dao.saveBookmarkIds([...this._selectedBookmarkIds]);
+            await this._dao.saveBookmarkInfos(this._selectedBookmarks);
             this.querySelector('notification-div').showSuccess('Feed bookmark folders saved');
             const savedEvent = new CustomEvent('selectedBookmarksSaved');
             this.dispatchEvent(savedEvent);
@@ -68,7 +68,7 @@ class BookmarksSelector extends HTMLElement {
     renderBookmarksList(bookmarksList){
         const list = this.querySelector('.bookmarks-list');
         list.innerHTML = bookmarksList.map(({id, path}) => {
-            const isSelected = this._selectedBookmarkIds.has(id);
+            const isSelected = !!this._selectedBookmarks.find(b => b.id === id);
             return `<div class="bookmark-item ${isSelected ? 'selected' : ''}" bookmark-id="${id}"><check-box ${isSelected ? 'checked="true"' : ''}></check-box>${path}</div>`;
         }).join('');
 
@@ -78,35 +78,58 @@ class BookmarksSelector extends HTMLElement {
             item.querySelector('check-box').setAttribute('checked', isSelected);
             const bookmarkId = item.getAttribute('bookmark-id');
             if(isSelected){
-                this._selectedBookmarkIds.add(bookmarkId);
+                this._selectedBookmarks.push({id: bookmarkId, order: this._selectedBookmarks.length});
             } else{
-                this._selectedBookmarkIds.delete(bookmarkId);
+                this.handleSelectedRemove(bookmarkId);
             }
-            this.querySelector('.action-bar .selection-summary .selected-count').textContent = this._selectedBookmarkIds.size;
+            this.querySelector('.action-bar .selection-summary .selected-count').textContent = this._selectedBookmarks.length;
             this.renderSelectedList();
         }));
     }
     renderSelectedList(){
         const list = this.querySelector('.selected-list');
+        const pathsById = new Map();
         if(this.getAttribute('type') === 'folder'){
-            list.innerHTML = [...this.querySelectorAll('.bookmarks-list .bookmark-item.selected')].map(el => {
-                const id = el.getAttribute('bookmark-id');
-                const path = el.textContent;
-                return `<div class="bookmark-item" bookmark-id="${id}"><div><img src="/media/chevron-up.svg"><img src="/media/chevron-down.svg"></div>${path}<img class="remove-selected" src="/media/x.svg"></div>`;
-            }).join('');
+            this.querySelectorAll('.bookmarks-list .bookmark-item.selected').forEach(el => pathsById.set(el.getAttribute('bookmark-id'), el.textContent));
         } else {
-            const bookmarks = [...this._bookmarksByFolder.values()].reduce((total, b) => total = [...total, ...b.filter(x => this._selectedBookmarkIds.has(x.id))], []);
-            list.innerHTML = bookmarks.map(({id, path}) => {
-                return `<div class="bookmark-item" bookmark-id="${id}"><div><img src="/media/chevron-up.svg"><img src="/media/chevron-down.svg"></div>${path}<img class="remove-selected" src="/media/x.svg"></div>`;
-            }).join('');
+            [...this._bookmarksByFolder.values()].forEach(group => group.forEach(b => pathsById.set(b.id, b.path)));
         }
+        list.innerHTML = this._selectedBookmarks.map(({id}) => {
+            const path = pathsById.get(id);
+            return `<div class="bookmark-item" bookmark-id="${id}"><div class="order-buttons"><img order-change="-1" src="/media/chevron-up.svg"><img order-change="1" src="/media/chevron-down.svg"></div>${path}<img class="remove-selected" src="/media/x.svg"></div>`;
+        }).join('');
+
         list.querySelectorAll('.remove-selected').forEach(el => el.addEventListener('click', ({target}) => {
             const bookmarkId = target.parentElement.getAttribute('bookmark-id');
-            this.querySelector(`.bookmarks-list .bookmark-item[bookmark-id="${bookmarkId}"]`)?.click();
-            if(this._selectedBookmarkIds.delete(bookmarkId)){
-                this.renderSelectedList();
-            };
-        }))
+            const relatedItem = this.querySelector(`.bookmarks-list .bookmark-item[bookmark-id="${bookmarkId}"]`);
+            if(relatedItem){
+                relatedItem.click();
+            } else {
+                this.handleSelectedRemove(bookmarkId);
+            }
+            
+            this.renderSelectedList();
+        }));
+
+        list.querySelectorAll('.order-buttons').forEach(el => el.addEventListener('click', ({target}) => {
+            const bookmarkId = target.parentElement.parentElement.getAttribute('bookmark-id');
+            const index = this._selectedBookmarks.findIndex(b => b.id === bookmarkId);
+            const targetOrder = index + Number(target.getAttribute('order-change'));
+            if(targetOrder < 0 || targetOrder >= this._selectedBookmarks.length) return;
+
+            this._selectedBookmarks[index].order = targetOrder;
+            this._selectedBookmarks[targetOrder].order = index;
+            this._selectedBookmarks.sort((a, b) => a.order - b.order);
+            
+            this.renderSelectedList();
+        }));
+    }
+    handleSelectedRemove(bookmarkId){
+        const deleteIndex = this._selectedBookmarks.findIndex(b => b.id === bookmarkId);
+        this._selectedBookmarks.splice(deleteIndex, 1);
+        for(let i=0; i<this._selectedBookmarks.length; i++){
+            this._selectedBookmarks[i].order = i;
+        }
     }
 }
 

@@ -30,15 +30,18 @@ export class Database {
         })
     }
 
-    getBookmarkIds(store){
+    getBookmarkInfos(store){
         return new Promise(async (resolve, reject) => {
             const db = await this.open();
             const req = db.getRWTransactionStore(store ?? this._store).getAll();
-            req.onsuccess = ({target: {result}}) => resolve(result.map(r => r.id));
+            req.onsuccess = ({target: {result}}) => {
+                result.sort((a, b) => a.order - b.order);
+                resolve(result)
+            };
             req.onerror = reject;
         });
     }
-    saveBookmarkIds(ids, store){
+    saveBookmarkInfos(bookmarks, store){
         return new Promise(async (resolve, reject) => {
             const db = await this.open();
             const transaction = db.getRWTransactionStore(store ?? this._store);
@@ -47,8 +50,8 @@ export class Database {
             clearTx.onsuccess = () => resolve(transaction);
             clearTx.onerror = reject;
         }).then((transaction) => {
-            return Promise.all(ids.map(id => new Promise((resolve, reject) => {
-                const req = transaction.add({id});
+            return Promise.all(bookmarks.map(({id, order}) => new Promise((resolve, reject) => {
+                const req = transaction.add({id, order});
                 req.onsuccess = resolve;
                 req.onerror = reject;
             })));
@@ -59,14 +62,14 @@ export class Database {
         const data = { version: 1 };
         for(let store in Stores){
             const storeName = Stores[store];
-            data[storeName] = await this.getBookmarkIds(storeName);
+            data[storeName] = await this.getBookmarkInfos(storeName);
         }
         return data;
     }
     async saveAllSettings(settings){
         for(let store in Stores){
             const storeName = Stores[store];
-            await this.saveBookmarkIds(settings[storeName], storeName);
+            await this.saveBookmarkInfos(settings[storeName], storeName);
         }
     }
 }
