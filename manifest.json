@@ -11,7 +11,8 @@
 	},
 	"permissions": [
 		"contextMenus",
-        "bookmarks"
+        "bookmarks",
+		"tabs"
 	],
 	"background": {
 		"service_worker": "src/areas/background/app.js",

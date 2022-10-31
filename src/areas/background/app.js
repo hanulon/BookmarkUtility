@@ -3,6 +3,12 @@ import {Database, Stores} from "/src/shared/models/database.mjs";
 const addToIdParent = 'bookmark-utility-ad-link-parent'
 const addToIdTemplate = 'bookmark-utility-ad-link-to~';
 const updaterIdTemplate = 'bookmark-utility-updater~';
+const actionSettingsId = 'bookmark-utility-action-settings';
+
+let updaterUrls = new Set();
+function getUpdaterBaseUrl(url){
+    return url?.substring(0, url?.lastIndexOf('/') + 1);
+}
 
 chrome.runtime.onInstalled.addListener(async () => {
     chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
@@ -11,10 +17,21 @@ chrome.runtime.onInstalled.addListener(async () => {
         }
     });
     setup();
+    chrome.tabs.onActivated.addListener(async ({tabId}) => {
+        const {url} = await chrome.tabs.get(tabId);
+        const baseUrl = getUpdaterBaseUrl(url);
+        chrome.action.setBadgeText({text: updaterUrls.has(baseUrl) ? "Updt" : ""});
+    });
+    chrome.tabs.onUpdated.addListener((_id, _change, {url, active}) => {
+        const baseUrl = getUpdaterBaseUrl(url);
+        chrome.action.setBadgeText({text: updaterUrls.has(baseUrl) && active ? "Updt" : ""});
+    });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-    if (info.menuItemId.startsWith(addToIdTemplate)){
+    if(info.menuItemId === actionSettingsId){
+        chrome.tabs.create({ 'url': "src/areas/settings/settings.html" });
+    } else if(info.menuItemId.startsWith(addToIdTemplate)){
         const folderId = info.menuItemId.replace(addToIdTemplate, '');
         let title = info.selectionText || "Undefined";
         try{
@@ -27,7 +44,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
             url: info.linkUrl,
             parentId: folderId
         });
-    } else if (info.menuItemId.startsWith(updaterIdTemplate)){
+    } else if(info.menuItemId.startsWith(updaterIdTemplate)){
         const bookmarkId = info.menuItemId.replace(updaterIdTemplate, '');
         chrome.bookmarks.update(bookmarkId, {url: tab.url});
     }
@@ -50,19 +67,27 @@ async function setup(){
         contexts: ['link'],
         parentId: addToIdParent
     }));
+
+    chrome.contextMenus.create({
+        title: 'Settings',
+        id: actionSettingsId,
+        contexts: ['action']
+    });
 }
 
 async function setupUpdaterContextMenus(path){
     const dao = new Database(Stores.updater);
     const ids = await dao.getBookmarkIds();
     const bookmarks = (await Promise.all(ids.map(id => chrome.bookmarks.get(id)))).map(r => r[0]);
+    updaterUrls = new Set();
 
     for(let bookmark of bookmarks){
-        const lastStashPosition = bookmark.url.lastIndexOf('/');
+        const baseUrl = getUpdaterBaseUrl(bookmark.url);
+        updaterUrls.add(baseUrl);
         chrome.contextMenus.create({
             title: `Update '${bookmark.title}' bookmark`,
             id: updaterIdTemplate + bookmark.id,
-            documentUrlPatterns: [bookmark.url.substring(0, lastStashPosition + 1) + '*']
+            documentUrlPatterns: [baseUrl + '*']
         });
     }
 }

@@ -31,6 +31,7 @@
     .bookmarks-list{
         flex:1;
         overflow: auto;
+        min-height: 50%;
     }
     .action-bar{
         padding-top: 1em;
@@ -84,12 +85,48 @@
         margin-right: 1em;
         color: white;
     }
+    .selected-list{
+        margin-top: 1em;
+        overflow-y: scroll;
+    }
+    .selected-list .bookmark-item{
+        display: flex;
+        align-items: center;
+    }
+    .selected-list .bookmark-item>div{
+        display: flex;
+        flex-direction: column;
+        margin-right: 1em;
+    }
+    .selected-list .bookmark-item>div>img{
+        height: 1.2em;
+        border-radius: 0 0 0.4em 0.4em;
+    }
+    .selected-list .bookmark-item>div>img:first-child{
+        margin-bottom: 1px;
+        border-radius: 0.4em 0.4em 0 0;
+    }
+    .selected-list .bookmark-item img{
+        background-color: #2a343f;
+        border-radius: 1em;
+    }
+    .selected-list .bookmark-item img:hover{
+        filter:brightness(150%);
+        cursor: pointer;
+    }
+    .selected-list .bookmark-item img:active{
+        filter:brightness(120%);
+    }
+    .selected-list .bookmark-item .remove-selected{
+        margin-left: auto;
+    }
 </style>
 <div class="item-container">
     <notification-div></notification-div>
     <h2>Feed folders</h2>
     <select></select>
     <div class="bookmarks-list"></div>
+    <div class="selected-list"></div>
     <div class="action-bar">
         <button class="styled-button save-btn">Save</button>
         <div class="selection-summary">

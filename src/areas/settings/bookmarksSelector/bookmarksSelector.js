@@ -53,6 +53,7 @@ class BookmarksSelector extends HTMLElement {
         } else {
             this.renderBookmarksList(loadedFolders);
         }
+        this.renderSelectedList();
         
         this.querySelector('.action-bar .selection-summary .total-count').textContent = this._bookmarksCount;
         this.querySelector('.action-bar .selection-summary .selected-count').textContent = this._selectedBookmarkIds.size;
@@ -82,7 +83,30 @@ class BookmarksSelector extends HTMLElement {
                 this._selectedBookmarkIds.delete(bookmarkId);
             }
             this.querySelector('.action-bar .selection-summary .selected-count').textContent = this._selectedBookmarkIds.size;
+            this.renderSelectedList();
         }));
+    }
+    renderSelectedList(){
+        const list = this.querySelector('.selected-list');
+        if(this.getAttribute('type') === 'folder'){
+            list.innerHTML = [...this.querySelectorAll('.bookmarks-list .bookmark-item.selected')].map(el => {
+                const id = el.getAttribute('bookmark-id');
+                const path = el.textContent;
+                return `<div class="bookmark-item" bookmark-id="${id}"><div><img src="/media/chevron-up.svg"><img src="/media/chevron-down.svg"></div>${path}<img class="remove-selected" src="/media/x.svg"></div>`;
+            }).join('');
+        } else {
+            const bookmarks = [...this._bookmarksByFolder.values()].reduce((total, b) => total = [...total, ...b.filter(x => this._selectedBookmarkIds.has(x.id))], []);
+            list.innerHTML = bookmarks.map(({id, path}) => {
+                return `<div class="bookmark-item" bookmark-id="${id}"><div><img src="/media/chevron-up.svg"><img src="/media/chevron-down.svg"></div>${path}<img class="remove-selected" src="/media/x.svg"></div>`;
+            }).join('');
+        }
+        list.querySelectorAll('.remove-selected').forEach(el => el.addEventListener('click', ({target}) => {
+            const bookmarkId = target.parentElement.getAttribute('bookmark-id');
+            this.querySelector(`.bookmarks-list .bookmark-item[bookmark-id="${bookmarkId}"]`)?.click();
+            if(this._selectedBookmarkIds.delete(bookmarkId)){
+                this.renderSelectedList();
+            };
+        }))
     }
 }
 
