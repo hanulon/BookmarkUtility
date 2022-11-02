@@ -67,10 +67,10 @@ class BookmarksSelector extends HTMLElement {
     }
     renderBookmarksList(bookmarksList){
         const list = this.querySelector('.bookmarks-list');
-        list.innerHTML = bookmarksList.map(({id, path}) => {
+        list.innerHTML = (bookmarksList ?? []).map(({id, path}) => {
             const isSelected = !!this._selectedBookmarks.find(b => b.id === id);
             return `<div class="bookmark-item ${isSelected ? 'selected' : ''}" bookmark-id="${id}"><check-box ${isSelected ? 'checked="true"' : ''}></check-box>${path}</div>`;
-        }).join('');
+        }).join('') || 'None';
 
         list.querySelectorAll('.bookmark-item').forEach(item => item.addEventListener('click', () => {
             item.classList.toggle('selected');
