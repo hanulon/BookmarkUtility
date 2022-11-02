@@ -25,9 +25,9 @@ class Navbar extends HTMLElement {
     }
     render(){
         this.shadowRoot.innerHTML = template;
-        this.shadowRoot.querySelectorAll('.navbar-container>div').forEach(el => {
-            el.addEventListener('click', (evt) => this.handleChange(evt.target));
-        });
+        this.shadowRoot.querySelectorAll('.navbar-container>div').forEach(el =>
+            el.addEventListener('click', ({target}) => this.handleChange(target))
+        );
     }
 }
 

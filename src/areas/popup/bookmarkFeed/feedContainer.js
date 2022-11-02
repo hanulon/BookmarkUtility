@@ -34,16 +34,16 @@ class FeedContainer extends HTMLElement {
         selector.value = this._selectedFolderId;
         counterInput.value = this._displayedLinksCount;
 
-        selector.addEventListener('change', (evt) => {
-            this._selectedFolderId = evt.target.value;
+        selector.addEventListener('change', ({target: {value}}) => {
+            this._selectedFolderId = value;
             this.render();
         });
-        counterInput.addEventListener('keyup', (evt) => {
-            this._displayedLinksCount = evt.target.value;
-        });
-        counterInput.addEventListener('change', (evt) => {
-            this._displayedLinksCount = evt.target.value;
-        });
+        counterInput.addEventListener('keyup', ({target: {value}}) =>
+            this._displayedLinksCount = value
+        );
+        counterInput.addEventListener('change', ({target: {value}}) =>
+            this._displayedLinksCount = value
+        );
 
         if(this._selectedFolderId){
             chrome.bookmarks.getChildren(this._selectedFolderId).then(nodes => {
@@ -62,7 +62,7 @@ class FeedContainer extends HTMLElement {
             });
         }
 
-        container.querySelector('.copy-loaded-to-clipboard').addEventListener('click', (evt) => {
+        container.querySelector('.copy-loaded-to-clipboard').addEventListener('click', () => {
             let linksText = '';
             for(let i=0; i<listOfLinks.children.length; i++){
                 const item = listOfLinks.children[i];
@@ -72,14 +72,14 @@ class FeedContainer extends HTMLElement {
             container.querySelector('notification-div').show('Links copied to clipboard');
         });
 
-        container.querySelector('.delete-loaded').addEventListener('click', (evt) => {
+        container.querySelector('.delete-loaded').addEventListener('click', () => {
             this._loadedLinkIds.forEach(async id => await chrome.bookmarks.remove(id));
             this.render();
         });
 
-        container.querySelector('.reload-button').addEventListener('click', (evt) => {
-            this.render();
-        });
+        container.querySelector('.reload-button').addEventListener('click', () => 
+            this.render()
+        );
     }
 }
 

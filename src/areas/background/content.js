@@ -1,12 +1,12 @@
 var linkName = "";
 
 
-addEventListener('contextmenu', (evt) => {
-    linkName = evt.target.textContent;
-});
+addEventListener('contextmenu', ({target: {textContent}}) => 
+    linkName = textContent
+);
 
-chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
-    if(request.type === "GetTargetLinkName"){
+chrome.runtime.onMessage.addListener(({type}, _sender, sendResponse) => {
+    if(type === "GetTargetLinkName"){
         sendResponse({linkName});
         linkName = "";
     }

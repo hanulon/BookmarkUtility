@@ -42,13 +42,13 @@ class BookmarksSelector extends HTMLElement {
         this._bookmarksCount = loadedFolders.length;
         if(this.getAttribute('type') === 'url'){
             const folderSelector = this.querySelector('select');
-            folderSelector.innerHTML = loadedFolders.map(({id, path}) => {
-                return `<option value="${id}">${path}</option>`;
-            }).join('');
+            folderSelector.innerHTML = loadedFolders.map(({id, path}) =>
+                `<option value="${id}">${path}</option>`
+            ).join('');
 
-            folderSelector.addEventListener('change', ({target: {value}}) => {
-                this.renderBookmarksList(this._bookmarksByFolder.get(value));
-            });
+            folderSelector.addEventListener('change', ({target: {value}}) =>
+                this.renderBookmarksList(this._bookmarksByFolder.get(value))
+            );
             this.renderBookmarksList(this._bookmarksByFolder.get(loadedFolders[0].id));
         } else {
             this.renderBookmarksList(loadedFolders);

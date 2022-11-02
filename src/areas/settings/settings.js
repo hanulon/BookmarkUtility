@@ -1,11 +1,11 @@
-import { Database, Stores } from "/src/shared/models/database.mjs";
+import { Database } from "/src/shared/models/database.mjs";
 
-document.querySelector('bookmarks-selector[for="context"]').addEventListener('selectedBookmarksSaved', () => {
-    chrome.runtime.sendMessage({type: "UpdateContextMenu"});
-});
-document.querySelector('bookmarks-selector[for="updater"]').addEventListener('selectedBookmarksSaved', () => {
-    chrome.runtime.sendMessage({type: "UpdateContextMenu"});
-});
+document.querySelector('bookmarks-selector[for="context"]').addEventListener('selectedBookmarksSaved', () =>
+    chrome.runtime.sendMessage({type: "UpdateContextMenu"})
+);
+document.querySelector('bookmarks-selector[for="updater"]').addEventListener('selectedBookmarksSaved', () =>
+    chrome.runtime.sendMessage({type: "UpdateContextMenu"})
+);
 
 document.querySelector('.export-btn').addEventListener('click', async () => {
     const settingsData = await new Database().getAllSettings();
@@ -32,6 +32,6 @@ document.querySelector('#import').addEventListener('change', ({target: {files}})
     reader.readAsText(files[0]);
 });
 
-document.querySelector('.import-btn').addEventListener('click', () => {
-    document.querySelector('#import').click();
-});
+document.querySelector('.import-btn').addEventListener('click', () =>
+    document.querySelector('#import').click()
+);
