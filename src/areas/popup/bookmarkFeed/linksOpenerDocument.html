@@ -1,6 +1,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, target-densityDpi=device-dpi">
 <style>
-    #open-all{
+    #open-all,#open-all-reversed{
         width: 100%;
     }
     h1{
@@ -13,11 +13,16 @@
     <data-insert/>
 </div>
 <button id="open-all">Open all links at once</button>
+<button id="open-all-reversed">Open all links at once in reverse</button>
 
 <script>
-    document.querySelector('#open-all').addEventListener('click', () => {
-        [...document.querySelectorAll('#links-container li a')].reverse().forEach(x => {
-            window.open(x.getAttribute('href'));
-        });
-    })
+    function openAll(reversed){
+        let links = [...document.querySelectorAll('#links-container li a')];
+        if(reversed){
+            links = links.reverse()
+        }
+        links.forEach(x => window.open(x.getAttribute('href')));
+    }
+    document.querySelector('#open-all').addEventListener('click', () => openAll(false));
+    document.querySelector('#open-all-reversed').addEventListener('click', () => openAll(true));
 </script>
