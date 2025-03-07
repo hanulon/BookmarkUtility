@@ -4,7 +4,7 @@
 	"developer": {
 		"name": "hanulon"
 	},
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"description": "An extension designed to ease the burden of a day to day management of bookmark backlogs",
 	"icons": {
 		"128": "media/icon128.png"
