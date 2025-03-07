@@ -16,13 +16,6 @@ chrome.runtime.onInstalled.addListener(async () => {
         }
     });
     setup();
-    chrome.tabs.onActivated.addListener(async ({tabId}) => {
-        const {url} = await chrome.tabs.get(tabId);
-        updateBadgeBasedOn(url);
-    });
-    chrome.tabs.onUpdated.addListener((_id, _change, {url, active}) => 
-        updateBadgeBasedOn(url, active)
-    );
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -53,14 +46,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
 function getUpdaterBaseUrl(url){
     return url?.substring(0, url?.lastIndexOf('/') + 1);
-}
-
-function updateBadgeBasedOn(url, active = true){
-    const baseUrl = getUpdaterBaseUrl(url);
-    const visible = updaterUrls.has(baseUrl) && active;
-
-    chrome.action.setBadgeText({text: visible ? "Updt" : ''});
-    chrome.contextMenus.update(actionUpdaterId, {visible});
 }
 
 async function setup(){
