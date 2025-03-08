@@ -85,9 +85,7 @@ class BookmarksSelector extends HTMLElement {
         list.innerHTML = (bookmarksList ?? []).map(({id, path}) => {
             const isSelected = !!this._selectedBookmarks.find(b => b.id === id);
             if(!path.toLowerCase().includes(this._filter)) return '';
-            const [prefix, afterPath] = path.split('//');
-            const pathWithBreakOpportunities = prefix + '//' + afterPath.replaceAll('/','/<wbr>')
-            return `<div class="bookmark-item ${isSelected ? 'selected' : ''}" bookmark-id="${id}"><check-box ${isSelected ? 'checked="true"' : ''}></check-box><span>${pathWithBreakOpportunities}</span></div>`;
+            return `<div class="bookmark-item ${isSelected ? 'selected' : ''}" bookmark-id="${id}"><check-box ${isSelected ? 'checked="true"' : ''}></check-box><span>${breakPath(path)}</span></div>`;
         }).join('') || 'None';
 
         list.querySelectorAll('.bookmark-item').forEach(item => item.addEventListener('click', () => {
@@ -153,6 +151,11 @@ class BookmarksSelector extends HTMLElement {
         this._filter = value.toLowerCase();
         this.renderBookmarksList();
     }
+}
+
+function breakPath(path){
+    const [prefix, afterPath] = path.split('//');
+    return !afterPath ? path : prefix + '//' + afterPath.replaceAll('/','/<wbr>');
 }
 
 customElements.define('bookmarks-selector', BookmarksSelector);
