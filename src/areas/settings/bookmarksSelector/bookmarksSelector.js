@@ -8,7 +8,10 @@ class BookmarksSelector extends HTMLElement {
         super();
         this._selectedBookmarks = [];
         this._bookmarksByFolder = new Map();
+        this._displayFolderId = -1;
+        this._folders = [];
         this._bookmarksCount = 0;
+        this._filter = '';
         switch (this.getAttribute('for')) {
             case "feed":
                 this._dao = new Database(Stores.feed);
@@ -29,30 +32,41 @@ class BookmarksSelector extends HTMLElement {
         this.render();
     }
 
+    /**
+     * @return {'url'|'folder'}
+     */
+    get Type(){
+        return this.getAttribute('type') ?? 'folder';
+    }
+
     async render(){
         const savedBookmarks = await this._dao.getBookmarkInfos();
         this._selectedBookmarks = savedBookmarks;
 
         this.innerHTML = template;
-        this.querySelector('.item-container>h2').textContent = this.getAttribute('header');
+        this.querySelector('.item-container .header h2').textContent = this.getAttribute('header');
+        this.querySelector('.item-container .filter-container input').addEventListener('input', ({target:{value}}) => this.doFilter(value));
+        this.querySelector('.item-container .filter-container input').setAttribute('placeholder', `Filter ${this.Type}s...`)
         
         const roots = await chrome.bookmarks.getTree();
-        const {loadedFolders, bookmarksByFolderId} = getFoldersFlatList(roots[0].children, this.getAttribute('type'));
+        const {loadedFolders, bookmarksByFolderId} = getFoldersFlatList(roots[0].children, this.Type);
+        this._folders = loadedFolders;
         this._bookmarksByFolder = bookmarksByFolderId;
         this._bookmarksCount = loadedFolders.length;
-        if(this.getAttribute('type') === 'url'){
+        if(this.Type === 'url'){
             const folderSelector = this.querySelector('select');
             folderSelector.innerHTML = loadedFolders.map(({id, path}) =>
                 `<option value="${id}">${path}</option>`
             ).join('');
 
-            folderSelector.addEventListener('change', ({target: {value}}) =>
-                this.renderBookmarksList(this._bookmarksByFolder.get(value))
-            );
-            this.renderBookmarksList(this._bookmarksByFolder.get(loadedFolders[0].id));
-        } else {
-            this.renderBookmarksList(loadedFolders);
+            folderSelector.addEventListener('change', ({target: {value}}) => {
+                this._displayFolderId = value;
+                this.renderBookmarksList()
+            });
+            this._displayFolderId = loadedFolders[0].id;
+            this._bookmarksCount = [...this._bookmarksByFolder.values()].flatMap(x=>x).length;
         }
+        this.renderBookmarksList();
         this.renderSelectedList();
         
         this.querySelector('.action-bar .selection-summary .total-count').textContent = this._bookmarksCount;
@@ -65,11 +79,13 @@ class BookmarksSelector extends HTMLElement {
             this.dispatchEvent(savedEvent);
         });
     }
-    renderBookmarksList(bookmarksList){
+    renderBookmarksList(){
+        const bookmarksList = this.Type === 'folder' ? this._folders : this._bookmarksByFolder.get(this._displayFolderId);
         const list = this.querySelector('.bookmarks-list');
         list.innerHTML = (bookmarksList ?? []).map(({id, path}) => {
             const isSelected = !!this._selectedBookmarks.find(b => b.id === id);
-            return `<div class="bookmark-item ${isSelected ? 'selected' : ''}" bookmark-id="${id}"><check-box ${isSelected ? 'checked="true"' : ''}></check-box>${path}</div>`;
+            if(!path.toLowerCase().includes(this._filter)) return '';
+            return `<div class="bookmark-item ${isSelected ? 'selected' : ''}" bookmark-id="${id}"><check-box ${isSelected ? 'checked="true"' : ''}></check-box><span>${path}</span></div>`;
         }).join('') || 'None';
 
         list.querySelectorAll('.bookmark-item').forEach(item => item.addEventListener('click', () => {
@@ -89,8 +105,8 @@ class BookmarksSelector extends HTMLElement {
     renderSelectedList(){
         const list = this.querySelector('.selected-list');
         const pathsById = new Map();
-        if(this.getAttribute('type') === 'folder'){
-            this.querySelectorAll('.bookmarks-list .bookmark-item.selected').forEach(el => pathsById.set(el.getAttribute('bookmark-id'), el.textContent));
+        if(this.Type === 'folder'){
+            this._folders.forEach(b => pathsById.set(b.id, b.path));
         } else {
             [...this._bookmarksByFolder.values()].forEach(group => group.forEach(b => pathsById.set(b.id, b.path)));
         }
@@ -130,6 +146,10 @@ class BookmarksSelector extends HTMLElement {
         for(let i=0; i<this._selectedBookmarks.length; i++){
             this._selectedBookmarks[i].order = i;
         }
+    }
+    doFilter(value){
+        this._filter = value.toLowerCase();
+        this.renderBookmarksList();
     }
 }
 

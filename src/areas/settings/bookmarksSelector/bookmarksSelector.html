@@ -25,8 +25,21 @@
     ::-webkit-scrollbar-thumb:hover {
         background-color: #9998;
     }
-    .item-container h2{
+    .item-container .header{
+        display: flex;
+        padding-right: 1em;
+    }
+    .item-container .header h2{
         margin-top: 0;
+    }
+    .item-container .header .filter-container{
+        margin-left: auto;
+    }
+    .item-container .header .filter-container>input{
+        background-color: #444444;
+        box-shadow: none;
+        border-style: none;
+        border-radius: 4px;
     }
     .bookmarks-list{
         flex:1;
@@ -49,6 +62,7 @@
         background-color: #171b1f;
         padding-left: 0.6em;
         min-height: 1.5em;
+        display: flex;
     }
     .bookmark-item:hover{
         filter: brightness(150%);
@@ -123,7 +137,10 @@
 </style>
 <div class="item-container">
     <notification-div></notification-div>
-    <h2>Feed folders</h2>
+    <div class="header">
+        <h2>Feed folders</h2>
+        <div class="filter-container"><input placeholder="Filter folders..."></div>
+    </div>
     <select></select>
     <div class="bookmarks-list"></div>
     <div class="selected-list"></div>
