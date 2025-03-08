@@ -15,7 +15,15 @@ chrome.runtime.onInstalled.addListener(async () => {
             chrome.contextMenus.removeAll(() => setup());
         }
     });
-    setup();
+    await setup();
+    
+    chrome.tabs.query({}, tabs => tabs.forEach(({url, id}) => updateBadgeBasedOn(url, id)));
+    chrome.tabs.onCreated.addListener(({url, id}) => 
+        updateBadgeBasedOn(url, id)
+    );
+    chrome.tabs.onUpdated.addListener((tabId, _change, {url}) => 
+        updateBadgeBasedOn(url, tabId)
+    );
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -46,6 +54,16 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
 function getUpdaterBaseUrl(url){
     return url?.substring(0, url?.lastIndexOf('/') + 1);
+}
+
+async function updateBadgeBasedOn(url, tabId, active = true){
+    const baseUrl = getUpdaterBaseUrl(url);
+    const visible = updaterUrls.has(baseUrl) && active;
+    const title = visible ? `Right click within page to see a menu option to update '${await getBookmark(updaterUrls.get(baseUrl))}'.` : 'Bookmark Utility';
+
+    chrome.action.setBadgeText({tabId, text: visible ? "U" : ''});
+    chrome.action.setTitle({title, tabId});
+    chrome.contextMenus.update(actionUpdaterId, {visible});
 }
 
 async function setup(){
@@ -94,4 +112,8 @@ async function setupUpdaterContextMenus(){
         contexts: ['action'],
         visible: false
     });
+}
+
+function getBookmark(id){
+    return new Promise(resolve => chrome.bookmarks.get(id, ([b]) => resolve(b)));
 }
