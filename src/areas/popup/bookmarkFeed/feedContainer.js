@@ -74,6 +74,9 @@ class FeedContainer extends HTMLElement {
 
         container.querySelector('.delete-loaded').addEventListener('click', async () => {
             if(!this._loadedLinkIds.length) return;
+            if(listOfLinks.children.length !== this._loadedLinkIds.length){
+                throw Error("_loadedLinkIds are not the same as displayed links!");
+            }
             await this._log.saveRemovedUrlsLog(listOfLinks.outerHTML);
             this.parentElement.querySelector('log-viewer').refreshLogs();
             for(const id of this._loadedLinkIds){
