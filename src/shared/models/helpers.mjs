@@ -1,3 +1,4 @@
+import {Database, Stores} from "/src/shared/models/database.mjs";
 let bookmarksByFolderId = new Map();
 
 export function getFoldersFlatList(bookmarksArr, type){
@@ -30,4 +31,13 @@ function getFlatTree(bookmark, parentPath, parentId, allowedType){
     }
 
     return result;
+}
+
+export async function getUpdaterBookmarks(){
+    const dao = new Database(Stores.updater);
+    const savedBookmarks = await dao.getBookmarkInfos();
+    return (await Promise.all(savedBookmarks.map(({id}) => chrome.bookmarks.get(id)))).map(([r]) => r);
+}
+export function getUpdaterBaseUrl(url){
+    return url?.substring(0, url?.lastIndexOf('/') + 1);
 }

@@ -19,6 +19,16 @@
             .card.selected{
                 display: block;
             }
+            #update-page-btn{
+                display: none;
+                background-color: mediumseagreen;
+                border-radius: 10px;
+                padding: 0.4em;
+            }
+            #update-page-btn:hover{
+                filter:brightness(120%);
+                cursor: pointer;
+            }
         </style>
         <script type="module" src="./navbar/navbar.js"></script>
         <script type="module" src="/src/shared/components/notification/notification.js"></script>
@@ -27,6 +37,7 @@
         <script type="module" src="./popup.js"></script>
     </head>
     <body>
+        <button id="update-page-btn"></button>
         <nav-bar></nav-bar>
         <bookmark-feed type="feed" class="card"></bookmark-feed>
         <multi-importer type="importer" class="card"></multi-importer>

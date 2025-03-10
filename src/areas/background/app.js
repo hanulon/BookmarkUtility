@@ -1,4 +1,5 @@
 import {Database, Stores} from "/src/shared/models/database.mjs";
+import { getUpdaterBookmarks, getUpdaterBaseUrl } from "/src/shared/models/helpers.mjs";
 
 //context action ids
 const addToParentId = 'bookmark-utility-ad-link-parent'
@@ -11,19 +12,21 @@ const updaterUrls = new Map();
 
 chrome.runtime.onInstalled.addListener(async () => {
     chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
-        if(request.type === "UpdateContextMenu"){
-            chrome.contextMenus.removeAll(() => setup());
+        switch(request.type){
+            case 'UpdateContextMenu':
+                chrome.contextMenus.removeAll(() => setup());
+                break;
         }
     });
     await setup();
     
     chrome.tabs.query({}, tabs => tabs.forEach(({url, id}) => updateBadgeBasedOn(url, id)));
-    chrome.tabs.onCreated.addListener(({url, id}) => 
+    chrome.tabs.onCreated.addListener(({url, id}) =>{
         updateBadgeBasedOn(url, id)
-    );
-    chrome.tabs.onUpdated.addListener((tabId, _change, {url}) => 
+    });
+    chrome.tabs.onUpdated.addListener((tabId, _change, {url}) => {
         updateBadgeBasedOn(url, tabId)
-    );
+    });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -51,11 +54,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     }
 });
 
-
-function getUpdaterBaseUrl(url){
-    return url?.substring(0, url?.lastIndexOf('/') + 1);
-}
-
 async function updateBadgeBasedOn(url, tabId, active = true){
     const baseUrl = getUpdaterBaseUrl(url);
     const visible = updaterUrls.has(baseUrl) && active;
@@ -67,7 +65,7 @@ async function updateBadgeBasedOn(url, tabId, active = true){
 }
 
 async function setup(){
-    setupUpdaterContextMenus();
+    await setupUpdaterContextMenus();
 
     const dao = new Database(Stores.context);
     const savedBookmarks = await dao.getBookmarkInfos();
@@ -92,9 +90,7 @@ async function setup(){
 }
 
 async function setupUpdaterContextMenus(){
-    const dao = new Database(Stores.updater);
-    const savedBookmarks = await dao.getBookmarkInfos();
-    const bookmarks = (await Promise.all(savedBookmarks.map(({id}) => chrome.bookmarks.get(id)))).map(r => r[0]);
+    const bookmarks = await getUpdaterBookmarks();
     updaterUrls.clear();
 
     for(let bookmark of bookmarks){
