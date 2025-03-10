@@ -73,3 +73,57 @@ export class Database {
         }
     }
 }
+
+export class LogDao{
+    #store = 'LogRemovedFromFeed';
+    DbName = "BookmarkUtilityLog";
+    DbVersion = 1;
+    
+    open(){
+        return new Promise((resolve, reject) => {
+            const request = globalThis.indexedDB.open(this.DbName, this.DbVersion);
+            
+            request.onerror = reject;
+            request.onupgradeneeded = ({target:{result}}) => {
+                result.createObjectStore(this.#store, {keyPath: "createdOn"})
+            }
+            request.onsuccess = ({target: {result}}) => {
+                result.getRWTransactionStore = (key) =>
+                    result.transaction(key, 'readwrite').objectStore(key);
+                resolve(result);
+            }
+        });
+    }
+
+    getRemovedUrlsLog(){
+        return new Promise(async (resolve, reject) => {
+            const db = await this.open();
+            const req = db.getRWTransactionStore(this.#store).getAll();
+            req.onsuccess = ({target: {result}}) => {
+                result.sort((a, b) => a.createdOn - b.createdOn);
+                resolve(result)
+            };
+            req.onerror = reject;
+        });
+    }
+    saveRemovedUrlsLog(logEntry){
+        return new Promise(async (resolve, reject) => {
+            const db = await this.open();
+            const transaction = db.getRWTransactionStore(this.#store);
+
+            const req = transaction.add({createdOn:Date.now(), logEntry});
+            req.onsuccess = resolve;
+            req.onerror = reject;
+        });
+    }
+    clearRemovedUrlsLog(){
+        return new Promise(async (resolve, reject) => {
+            const db = await this.open();
+            const transaction = db.getRWTransactionStore(this.#store);
+
+            const clearTx = transaction.clear();
+            clearTx.onsuccess = resolve;
+            clearTx.onerror = reject;
+        });
+    }
+}

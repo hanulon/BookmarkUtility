@@ -4,7 +4,6 @@ import { getUpdaterBookmarks, getUpdaterBaseUrl } from "/src/shared/models/helpe
 //context action ids
 const addToParentId = 'bookmark-utility-ad-link-parent'
 const actionSettingsId = 'bookmark-utility-action-settings';
-const actionUpdaterId = 'bookmark-utility-action-updater';
 const addToIdTemplate = 'bookmark-utility-ad-link-to~';
 const updaterIdTemplate = 'bookmark-utility-updater~';
 
@@ -32,9 +31,6 @@ chrome.runtime.onInstalled.addListener(async () => {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     if(info.menuItemId === actionSettingsId){
         chrome.tabs.create({ 'url': "src/areas/settings/settings.html" });
-    } else if(info.menuItemId === actionUpdaterId){
-        const bookmarkId = updaterUrls.get(getUpdaterBaseUrl(tab.url));
-        chrome.bookmarks.update(bookmarkId, {url: tab.url});
     } else if(info.menuItemId.startsWith(addToIdTemplate)){
         const folderId = info.menuItemId.replace(addToIdTemplate, '');
         let title = info.selectionText || "Undefined";
@@ -57,11 +53,10 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 async function updateBadgeBasedOn(url, tabId, active = true){
     const baseUrl = getUpdaterBaseUrl(url);
     const visible = updaterUrls.has(baseUrl) && active;
-    const title = visible ? `Right click within page to see a menu option to update '${await getBookmark(updaterUrls.get(baseUrl))}'.` : 'Bookmark Utility';
+    const title = visible ? 'Bookmark Utility (Link update available)' : 'Bookmark Utility';
 
     chrome.action.setBadgeText({tabId, text: visible ? "U" : ''});
     chrome.action.setTitle({title, tabId});
-    chrome.contextMenus.update(actionUpdaterId, {visible});
 }
 
 async function setup(){
@@ -102,12 +97,6 @@ async function setupUpdaterContextMenus(){
             documentUrlPatterns: [baseUrl + '*']
         });
     }
-    chrome.contextMenus.create({
-        title: 'Update link',
-        id: actionUpdaterId,
-        contexts: ['action'],
-        visible: false
-    });
 }
 
 function getBookmark(id){
