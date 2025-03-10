@@ -21,12 +21,10 @@ window.onload = async () =>{
     setTimeout(() => navBar.setDefault(), 100);
     chrome.windows.getCurrent({populate:true}, async w => {
         const activeTab = w.tabs.find(t => t.active);
-        console.log(activeTab, activeTab.title, activeTab.url, activeTab.id);
         chrome.action.getBadgeText({tabId:activeTab.id}, async name => {
             if(name === 'U'){
-                const bookmarks = await bookmarksTask;
                 const baseUrl = getUpdaterBaseUrl(activeTab.url);
-                const bookmark = bookmarks.find(b => getUpdaterBaseUrl(b.url) === baseUrl);
+                const bookmark = (await bookmarksTask).find(b => getUpdaterBaseUrl(b.url) === baseUrl);
                 const updateButton = document.querySelector('#update-page-btn');
                 updateButton.textContent = `Update '${bookmark.title}' bookmark`;
                 updateButton.style.display = 'inline-block';
