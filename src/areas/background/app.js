@@ -9,7 +9,7 @@ const updaterIdTemplate = 'bookmark-utility-updater~';
 
 const updaterUrls = new Map();
 
-chrome.runtime.onInstalled.addListener(async () => {
+(async () => {
     chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
         switch(request.type){
             case 'UpdateContextMenu':
@@ -23,10 +23,12 @@ chrome.runtime.onInstalled.addListener(async () => {
     chrome.tabs.onCreated.addListener(({url, id}) =>{
         updateBadgeBasedOn(url, id)
     });
-    chrome.tabs.onUpdated.addListener((tabId, _change, {url}) => {
-        updateBadgeBasedOn(url, tabId)
+    chrome.tabs.onUpdated.addListener((tabId, {status}, {url}) => {
+        if(status === 'loading'){
+            updateBadgeBasedOn(url, tabId);
+        }
     });
-});
+})();
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     if(info.menuItemId === actionSettingsId){

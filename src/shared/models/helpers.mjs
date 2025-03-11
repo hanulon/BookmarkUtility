@@ -41,3 +41,7 @@ export async function getUpdaterBookmarks(){
 export function getUpdaterBaseUrl(url){
     return url?.substring(0, url?.lastIndexOf('/') + 1);
 }
+export function breakPath(path){
+    const [prefix, afterPath] = path.split('//');
+    return !afterPath ? path : prefix + '//' + afterPath.replaceAll('/','/<wbr>');
+}

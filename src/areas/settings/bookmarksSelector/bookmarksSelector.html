@@ -89,15 +89,12 @@
     .bookmark-item.selected {
         background-color: #007fff26;
     }
-    .item-container select{
+    [type="folder"] .item-container select-dropdown{
         display: none;
     }
-    [type="url"] .item-container select{
-        display: block;
-        background-color: #171b1f;
+    .item-container select-dropdown{
         margin-bottom: 1em;
         margin-right: 1em;
-        color: white;
     }
     .selected-list{
         margin-top: 1em;
@@ -141,7 +138,7 @@
         <h2>Feed folders</h2>
         <div class="filter-container"><input placeholder="Filter folders..."></div>
     </div>
-    <select></select>
+    <select-dropdown></select-dropdown>
     <div class="bookmarks-list"></div>
     <div class="selected-list"></div>
     <div class="action-bar">

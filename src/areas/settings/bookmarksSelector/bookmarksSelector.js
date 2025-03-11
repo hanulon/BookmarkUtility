@@ -1,5 +1,5 @@
 import { Database, Stores } from "/src/shared/models/database.mjs";
-import { getFoldersFlatList } from "/src/shared/models/helpers.mjs";
+import { getFoldersFlatList, breakPath } from "/src/shared/models/helpers.mjs";
 
 const template = await fetch('./bookmarksSelector/bookmarksSelector.html').then(resp => resp.text());
 
@@ -54,12 +54,10 @@ class BookmarksSelector extends HTMLElement {
         this._bookmarksByFolder = bookmarksByFolderId;
         this._bookmarksCount = loadedFolders.length;
         if(this.Type === 'url'){
-            const folderSelector = this.querySelector('select');
-            folderSelector.innerHTML = loadedFolders.map(({id, path}) =>
-                `<option value="${id}">${path}</option>`
-            ).join('');
+            const folderSelector = this.querySelector('select-dropdown');
+            folderSelector.setOptions(loadedFolders.map(({id, path}) => ({value:id, label:path})));
 
-            folderSelector.addEventListener('change', ({target: {value}}) => {
+            folderSelector.addEventListener('change', ({detail: {value, label}}) => {
                 this._displayFolderId = value;
                 this.renderBookmarksList()
             });
@@ -151,11 +149,6 @@ class BookmarksSelector extends HTMLElement {
         this._filter = value.toLowerCase();
         this.renderBookmarksList();
     }
-}
-
-function breakPath(path){
-    const [prefix, afterPath] = path.split('//');
-    return !afterPath ? path : prefix + '//' + afterPath.replaceAll('/','/<wbr>');
 }
 
 customElements.define('bookmarks-selector', BookmarksSelector);

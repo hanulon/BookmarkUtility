@@ -1,0 +1,73 @@
+<style>
+    .select-dropdown-container input{
+        width: 100%;
+        background-color: #171b1f;
+        color: white;
+        border-style: none;
+    }
+    .menu-container{
+        border-style: solid;
+        border-color: #888888;
+        border-width: 1px;
+        position: absolute;
+        background-color: black;
+        z-index: 1;
+        width: 100%;
+        max-height: -webkit-fill-available;
+        overflow-y: auto;
+
+        display: none;
+    }
+    .menu-container.shown{
+        display: block;
+    }
+    .menu-container .option{
+        padding: 0 1em;
+        cursor: default;
+    }
+    .menu-container .option:hover{
+        background-color: dimgray;
+    }
+    .selector-container{
+        display: flex;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #888888;
+        border-radius: 2px;
+        background-color: #171b1f;
+        color: white;
+    }
+    .selector-container .chevron{
+        align-content: center;
+        width: 15px;
+        text-align: center;
+    }
+    .selector-container .chevron svg{
+        height: 60%;
+        aspect-ratio: 1/1;
+    }
+    ::-webkit-scrollbar {
+        height: 12px;
+        width: 12px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background-clip: padding-box;
+        background-color: #6665;
+        border: 2px solid transparent;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: #9998;
+    }
+</style>
+<div class="select-dropdown-container">
+    <div class="selector-container">
+        <input type="text">
+        <div class="chevron">
+            <svg fill="none" viewBox="0 0 20 8">
+            <path d="M0 0L8 8L16 0" stroke="currentColor" stroke-width="2"></path>
+            </svg>
+        </div>
+    </div>
+    <div class="menu-container"></div>
+</div>
