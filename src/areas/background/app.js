@@ -1,5 +1,5 @@
 import {Database, Stores} from "/src/shared/models/database.mjs";
-import { getUpdaterBookmarks, getUpdaterBaseUrl } from "/src/shared/models/helpers.mjs";
+import { getUpdaterBookmarks, getUpdaterBaseUrl, log } from "/src/shared/models/helpers.mjs";
 
 //context action ids
 const addToParentId = 'bookmark-utility-ad-link-parent'
@@ -9,52 +9,54 @@ const updaterIdTemplate = 'bookmark-utility-updater~';
 
 const updaterUrls = new Map();
 
-(async () => {
-    console.log('Setting up service worker.');
-
-    chrome.runtime.onMessage.addListener(async (request, _sender, _sendResponse) => {
-        switch(request.type){
-            case 'UpdateContextMenu':
-                await setupContextMenus();
-                break;
-        }
-    });
-    await setupContextMenus();
-    
-    chrome.tabs.query({}, tabs => tabs.forEach(({url, id}) => updateBadgeBasedOn(url, id)));
-    chrome.tabs.onCreated.addListener(({url, id}) =>{
-        updateBadgeBasedOn(url, id)
-    });
-    chrome.tabs.onUpdated.addListener((tabId, {status}, {url}) => {
-        if(status === 'loading'){
-            updateBadgeBasedOn(url, tabId);
-        }
-    });
-
-    chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-        if(info.menuItemId === actionSettingsId){
-            chrome.tabs.create({ 'url': "src/areas/settings/settings.html" });
-        } else if(info.menuItemId.startsWith(addToIdTemplate)){
-            const folderId = info.menuItemId.replace(addToIdTemplate, '');
-            let title = info.selectionText || "Undefined";
-            try{
-                const {linkName} = await chrome.tabs.sendMessage(tab.id, {type: "GetTargetLinkName"});
-                title = linkName || title;
-            }catch(e){}
-            
-            chrome.bookmarks.create({
-                title: title,
-                url: info.linkUrl,
-                parentId: folderId
-            });
-        } else if(info.menuItemId.startsWith(updaterIdTemplate)){
-            const bookmarkId = info.menuItemId.replace(updaterIdTemplate, '');
-            chrome.bookmarks.update(bookmarkId, {url: tab.url});
-        }
-    });
-
-    console.log('Service worker is ready.');
-})();
+/***
+ * Seems listeners CANNOT be set within any function, because
+ * when the background service becomes inactive the func closures are erased?
+ * So the setup has to happen straight here.
+ */
+log('Setting up service worker.');
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+    if(info.menuItemId === actionSettingsId){
+        chrome.tabs.create({ 'url': "src/areas/settings/settings.html" });
+    } else if(info.menuItemId.startsWith(addToIdTemplate)){
+        log('Trying to Add link.', info.menuItemId);
+        const folderId = info.menuItemId.replace(addToIdTemplate, '');
+        let title = info.selectionText || "Undefined";
+        try{
+            log('Trying to get name for link.', info.menuItemId);
+            const {linkName} = await chrome.tabs.sendMessage(tab.id, {type: "GetTargetLinkName"});
+            title = linkName || title;
+        }catch(e){}
+        
+        chrome.bookmarks.create({
+            title: title,
+            url: info.linkUrl,
+            parentId: folderId
+        });
+        log('Creating bookmark.', info.menuItemId);
+    } else if(info.menuItemId.startsWith(updaterIdTemplate)){
+        const bookmarkId = info.menuItemId.replace(updaterIdTemplate, '');
+        chrome.bookmarks.update(bookmarkId, {url: tab.url});
+    }
+});
+setupContextMenus();
+chrome.runtime.onMessage.addListener(async (request, _sender, _sendResponse) => {
+    switch(request.type){
+        case 'UpdateContextMenu':
+            await setupContextMenus();
+            break;
+    }
+});
+chrome.tabs.query({}, tabs => tabs.forEach(({url, id}) => updateBadgeBasedOn(url, id)));
+chrome.tabs.onCreated.addListener(({url, id}) =>{
+    updateBadgeBasedOn(url, id)
+});
+chrome.tabs.onUpdated.addListener((tabId, {status}, {url}) => {
+    if(status === 'loading'){
+        updateBadgeBasedOn(url, tabId);
+    }
+});
+log('Service worker is ready.');
 
 
 async function updateBadgeBasedOn(url, tabId, active = true){

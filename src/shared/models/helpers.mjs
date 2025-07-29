@@ -45,3 +45,12 @@ export function breakPath(path){
     const [prefix, afterPath] = path.split('//');
     return !afterPath ? path : prefix + '//' + afterPath.replaceAll('/','/<wbr>');
 }
+
+export function log(...args){
+    const date = new Date().toISOString();
+    const change = {};
+    change[date] = args.join(' ');
+    chrome.storage.local.set(change, function() {
+        console.log(date, ...args);
+    });
+}
