@@ -43,6 +43,7 @@ setupContextMenus();
 chrome.runtime.onMessage.addListener(async (request, _sender, _sendResponse) => {
     switch(request.type){
         case 'UpdateContextMenu':
+            log('Trying to update context menu within a listener.');
             await setupContextMenus();
             break;
     }
@@ -69,25 +70,29 @@ async function updateBadgeBasedOn(url, tabId, active = true){
 }
 
 async function setupContextMenus(){
+    log('Within setupContextMenus function');
     await chrome.contextMenus.removeAll();
     await setupUpdaterContextMenus();
 
     const dao = new Database(Stores.context);
     const savedBookmarks = await dao.getBookmarkInfos();
     const folders = (await Promise.all(savedBookmarks.map(({id}) => chrome.bookmarks.get(id)))).map(r => r[0]);
-    await chrome.contextMenus.create({
+    log('setupContextMenus: right before adding "Add link to..."');
+    await createContextMenu({
         title: 'Add link to...',
         id: addToParentId,
         contexts: ['link']
-    })
-    folders.forEach(folder => chrome.contextMenus.create({
-        title: `...${folder.title}`,
-        id: addToIdTemplate + folder.id,
-        contexts: ['link'],
-        parentId: addToParentId
-    }));
+    });
+    for(const folder of folders){
+        await createContextMenu({
+            title: `...${folder.title}`,
+            id: addToIdTemplate + folder.id,
+            contexts: ['link'],
+            parentId: addToParentId
+        });
+    }
 
-    chrome.contextMenus.create({
+    await createContextMenu({
         title: 'Settings',
         id: actionSettingsId,
         contexts: ['action']
@@ -101,10 +106,15 @@ async function setupUpdaterContextMenus(){
     for(let bookmark of bookmarks){
         const baseUrl = getUpdaterBaseUrl(bookmark.url);
         updaterUrls.set(baseUrl, bookmark.id);
-        chrome.contextMenus.create({
+        await createContextMenu({
             title: `Update '${bookmark.title}' bookmark`,
             id: updaterIdTemplate + bookmark.id,
             documentUrlPatterns: [baseUrl + '*']
         });
     }
+}
+
+//according to the documentation chrome.contextMenus.create() does not return promise - why?
+function createContextMenu(createProperties){
+    return new Promise((resolve) => chrome.contextMenus.create(createProperties, resolve));
 }
